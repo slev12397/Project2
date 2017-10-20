@@ -28,8 +28,6 @@ def find_urls(s):
     x = re.findall('http[s]?://(?:www.)?[a-zA-Z0-9]+(?:[.]{1}[a-zA-Z]{2,})+[/S]*', s)
     return x
 
-
-
 ## PART 2  - Define a function grab_headlines.
 ## INPUT: N/A. No input.
 ## Grab the headlines from the "Most Read" section of
