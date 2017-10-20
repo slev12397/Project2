@@ -25,7 +25,7 @@ from bs4 import BeautifulSoup
 ## find_urls("the internet is awesome #worldwideweb") should return [], empty list
 
 def find_urls(s):
-    x = re.findall('http[s]?://(?:[a-zA-Z]|[0-9])+[.][a-zA-Z.]{2,}[^\s]', s)
+    x = re.findall('http[s]?://(?:www.)?[a-zA-Z0-9]+(?:[.]{1}[a-zA-Z]{2,})+[/S]*', s)
     return x
 
 
@@ -36,16 +36,15 @@ def find_urls(s):
 ## http://www.michigandaily.com/section/opinion
 
 def grab_headlines():
-    # base_url = 'http://www.michigandaily.com/section/opinion'
-    # r = requests.get(base_url)
-    opened = open('opinion.html','r').read()
-    soup = BeautifulSoup(opened, "lxml")
-    lis = []
-    new = []
-    lis = soup.find('ol').find_all('a')
-    for each in lis:
-        new.append(each.string)
-    return new
+    base_url = 'http://www.michigandaily.com/section/opinion'
+    r = requests.get(base_url)
+    soup = BeautifulSoup(r.text, "lxml")
+    head = []
+    lst = soup.find('ol').find_all('a')
+    for atag in lst:
+        head.append(atag.string)
+    return head
+
 ## PART 3 (a) Define a function called get_umsi_data.  It should create a dictionary
 ## saved in a variable umsi_titles whose keys are UMSI people's names, and whose
 ## associated values are those people's titles, e.g. "PhD student" or "Associate
@@ -58,15 +57,30 @@ def grab_headlines():
 ## requests.get(base_url, headers={'User-Agent': 'SI_CLASS'})
 
 def get_umsi_data():
-    pass
-    #Your code here
+    umsi_titles ={}
+    pagenum = 0
 
+    for page in range(13):
+        base_url = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=All&page=' + str(pagenum)
+        r = requests.get(base_url, headers = {'User-Agent':'SI_CLASS'})
+        soup = BeautifulSoup(r.text, "lxml")
+        lst = soup.find('div', class_ ="view-content").find_all('div', class_="views-row")
+        for each in lst:
+            name = each.find('div', class_ ='field field-name-title field-type-ds field-label-hidden').find('h2').string
+            title = each.find('div', class_="field field-name-field-person-titles field-type-text field-label-hidden").find('div',class_='field-item even').string
+            umsi_titles[name] = title
+        pagenum += 1
+    return umsi_titles
 ## PART 3 (b) Define a function called num_students.
 ## INPUT: The dictionary from get_umsi_data().
 ## OUTPUT: Return number of PhD students in the data.  (Don't forget, I may change the input data)
 def num_students(data):
-    pass
-    #Your code here
+    phds = 0
+    dic = get_umsi_data()
+    for persontitle in dic.values():
+        if persontitle == "PhD student":
+            phds += 1
+    return phds
 
 
 
